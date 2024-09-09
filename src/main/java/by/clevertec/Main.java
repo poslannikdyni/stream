@@ -20,10 +20,10 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.averagingDouble;
 import static java.util.stream.Collectors.averagingInt;
@@ -32,37 +32,34 @@ import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.mapping;
 import static java.util.stream.Collectors.minBy;
 import static java.util.stream.Collectors.partitioningBy;
-import static java.util.stream.Collectors.summarizingDouble;
 
 public class Main {
     private static final String BUILDING_TYPE_HOSPITAL = "Hospital";
     private static final String BUILDING_TYPE_OTHER = "Civil building";
 
     public static void main(String[] args) {
-//        task1();
-//        task2();
-//        task3();
-//        task4();
-//        task5();
-//        task6();
-//        task7();
-//        task8();
-//        task9();
-//        task10();
-//        task11();
-//        task12();
-
+        task1();
+        task2();
+        task3();
+        task4();
+        task5();
+        task6();
+        task7();
+        task8();
+        task9();
+        task10();
+        task11();
+        task12();
         task13();
-//        task14();
-//        task15();
-
-//        task16();
-//        task17();
-//        task18();
-//        task19();
-//        task20();
-//        task21();
-//        task22();
+        task14();
+        task15();
+        task16();
+        task17();
+        task18();
+        task19();
+        task20();
+        task21();
+        task22();
     }
 
     // ### Задача №1
@@ -269,7 +266,7 @@ public class Main {
                 .filter(Objects::nonNull)
                 .collect(partitioningBy(house -> BUILDING_TYPE_HOSPITAL.equals(house.getBuildingType())))
                 .entrySet().stream()
-                .flatMap(map->toPersonInfo(map).stream())
+                .flatMap(map -> toPersonInfo(map).stream())
                 .sorted(Comparator.comparing(PersonInfo::isHospital).reversed()
                         .thenComparing(personInfo -> getPersonAge(personInfo.person) < 18 || getPersonAge(personInfo.person) > 65)
                 )
@@ -278,7 +275,10 @@ public class Main {
                 .forEach(System.out::println);
     }
 
-    private record PersonInfo(Boolean isHospital, Person person){};
+    private record PersonInfo(Boolean isHospital, Person person) {
+    }
+
+    ;
 
     private static List<PersonInfo> toPersonInfo(Map.Entry<Boolean, List<House>> map) {
         return map.getValue().stream()
@@ -302,7 +302,63 @@ public class Main {
     //     Вывести суммарные стоимости в консоль. Вывести общую выручку логистической кампании.
     public static void task14() {
         List<Car> cars = Util.getCars();
-//        cars.stream() Продолжить ...
+        var countriesAuto = cars.stream()
+                .filter(Objects::nonNull)
+                .collect(Collectors.groupingBy(getObjectStringFunction(), Collectors.toList()))
+                .entrySet().stream()
+                .filter(map -> !map.getKey().equals("Other"))
+                .collect(Collectors.toSet());
+
+        var totalRevenue  = countriesAuto.stream()
+                .map(map -> new CountryInfo(map.getKey(), map.getValue()))
+                .peek(countryInfo -> {
+                    System.out.printf("%s:\nAll auto mass : %s:\nAll transportation costs : %s:\nSum price : %s:\nCars : %s%n",
+                            countryInfo.country, countryInfo.allMass , countryInfo.allTransportCost, countryInfo.sumPrice, countryInfo.cars);
+                })
+                .mapToDouble(countryInfo -> countryInfo.sumPrice - countryInfo.allTransportCost)
+                .sum();
+        System.out.println("Total revenue: " + totalRevenue);
+    }
+
+    private static class CountryInfo {
+        private String country;
+        private List<Car> cars;
+        private Double allMass;
+        private Double allTransportCost;
+        private Double sumPrice;
+
+        public CountryInfo(String country, List<Car> cars) {
+            this.country = country;
+            this.cars = cars;
+            this.allMass = cars.stream().mapToDouble(Car::getMass).sum();
+            this.allTransportCost = allMass * 7.14 / 1000d;
+            this.sumPrice = cars.stream().mapToDouble(Car::getPrice).sum();
+        }
+    }
+
+    private static Function<Car, String> getObjectStringFunction() {
+        Set<String> brandForUzbekistan = Set.of("bmw", "lexus", "chrysler", "toyota");
+        Set<String> brandForKazakhstan = Set.of("gmc", "dodge");
+        Set<String> modelForKyrgyzstan = Set.of("civic", "cherokee");
+        Set<String> forbiddenColorsForRussia = Set.of("yellow", "red", "green", "blue");
+
+        return car -> {
+            if ("Jaguar".equalsIgnoreCase(car.getCarMake()) || "White".equalsIgnoreCase(car.getColor())) {
+                return "Turkmenistan";
+            } else if (car.getMass() < 1500 && brandForUzbekistan.contains(car.getCarMake().toLowerCase())) {
+                return "Uzbekistan";
+            } else if ("Black".equalsIgnoreCase(car.getColor()) && car.getMass() > 4000 || brandForKazakhstan.contains(car.getCarMake().toLowerCase())) {
+                return "Kazakhstan";
+            } else if (car.getReleaseYear() < 1982 || modelForKyrgyzstan.contains(car.getCarModel().toLowerCase())) {
+                return "Kyrgyzstan";
+            } else if (forbiddenColorsForRussia.contains(car.getColor().toLowerCase()) || car.getPrice() > 40000) {
+                return "Russia";
+            } else if (car.getVin() != null && car.getVin().contains("59")) {
+                return "Mongolia";
+            } else {
+                return "Other";
+            }
+        };
     }
 
     // ### Задача №15
