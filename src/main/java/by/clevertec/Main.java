@@ -309,11 +309,11 @@ public class Main {
                 .filter(map -> !map.getKey().equals("Other"))
                 .collect(Collectors.toSet());
 
-        var totalRevenue  = countriesAuto.stream()
+        var totalRevenue = countriesAuto.stream()
                 .map(map -> new CountryInfo(map.getKey(), map.getValue()))
                 .peek(countryInfo -> {
                     System.out.printf("%s:\nAll auto mass : %s:\nAll transportation costs : %s:\nSum price : %s:\nCars : %s%n",
-                            countryInfo.country, countryInfo.allMass , countryInfo.allTransportCost, countryInfo.sumPrice, countryInfo.cars);
+                            countryInfo.country, countryInfo.allMass, countryInfo.allTransportCost, countryInfo.sumPrice, countryInfo.cars);
                 })
                 .mapToDouble(countryInfo -> countryInfo.sumPrice - countryInfo.allTransportCost)
                 .sum();
