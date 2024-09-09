@@ -1,11 +1,14 @@
 plugins {
     id 'java'
-    id "io.freefair.lombok" version "6.5.1"
+    id "io.freefair.lombok" version "8.10"
 }
 
 group = 'by.clevertec'
 version = '1.0-SNAPSHOT'
-sourceCompatibility = '17'
+sourceCompatibility = '21'
+compileJava.options.encoding = 'UTF-8'
+compileTestJava.options.encoding = 'UTF-8'
+
 
 repositories {
     mavenCentral()
